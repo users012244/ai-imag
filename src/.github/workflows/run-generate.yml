@@ -1,0 +1,32 @@
+name: Run Gemini Image Generation
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: {}
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+      - name: Install
+        run: npm ci
+      - name: Build
+        run: npm run build
+      - name: Run image generation
+        env:
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          INPUT_IMAGE_PATH: assets/cat_image.png
+          OUTPUT_DIR: out
+        run: |
+          node ./dist/generate-image.js
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-image
+          path: out/
